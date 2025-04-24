@@ -4,8 +4,6 @@
 #include <unistd.h>
 #include <time.h>
 #include "../include/lib.h"
-//#define MAX_GN 100000
-//#define CYCLE 10
 
 int rndnm(){
 	return rand()%MAX_GN;
