@@ -9,6 +9,7 @@ First:
 	@$(CC) -o $(BDir)exe $(SDir)*
 
 create_dir:
+	@chmod u+x create_dir.sh
 	@./create_dir.sh
 
 clean:
