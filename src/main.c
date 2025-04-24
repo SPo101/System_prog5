@@ -1,37 +1,42 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 #include <unistd.h>
 #include <time.h>
-#include <signal.h>
 
-#define MAX_GUESS_NUM 1000
-
-void usr1(){
-	write(1, "usr1\n", 5);
-}
-
-void usr2(){
-	write(1, "usr2\n", 5);
-}
+#include "../include/lib.h"
 
 int main(){
-	signal(SIGUSR1, usr1);
-	signal(SIGUSR2, usr2);
+	srand(time(NULL));
+
+	sigset_t mask;
+	sigfillset(&mask);
+	sigdelset(&mask, SIGINT);
+	sigdelset(&mask, SIGTERM);
+	sigprocmask(SIG_SETMASK, &mask, NULL);
 	
-	time_t start_time = time(NULL);
-	int cnt_guesses = 0;	
 
-	int cid = fork();
-	if(!cid){
-		//child here;
-		while(1){
-			kill(getppid(), SIGUSR2);
+	int pid = fork();
+	int (*player[2])(int, sigset_t *) = {follover, leader};
+	int tries;
+
+	if(!pid){
+		for(int i=0; i<CYCLE; i++){
+			tries = player[i%2](getppid(), &mask);
+			if(i%2==1)
+				printf("RES_ch - %d\n", tries);
 		}
+
+	}
+	if(pid){
+		for(int i=0; i<CYCLE; i++){
+			tries = player[(i+1)%2](pid, &mask);
+			if((i+1)%2==1)
+				printf("RES_pr - %d\n", tries);
+		}
+
 	}
 
-	//parent here;
-	while(1){
-		kill(cid, SIGUSR1);
-	}
-		
+	exit(EXIT_SUCCESS);
 }
+
